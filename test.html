@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <title>NauticalRoute test page</title>
+    <meta http-equiv="content-type" content="application/xhtml+xml; charset=utf-8" />
+    <link rel="stylesheet" type="text/css" href="NauticalRoute.css" />
+    <script type="text/javascript" src="http://openlayers.org/api/2.8/OpenLayers.js"></script>
+    <script type="text/javascript" src="NauticalRoute.js"></script>
+    <script type="text/javascript">
+    //<![CDATA[
+        // General settings
+        OpenLayers.IMAGE_RELOAD_ATTEMPTS = 3;
+        OpenLayers.Util.onImageLoadErrorColor = 'transparent';
+
+        var map, nauticalRoute;
+        var init = function() {
+            var options = {
+                projection: new OpenLayers.Projection('EPSG:900913'),
+                displayProjection: new OpenLayers.Projection('EPSG:4326'),
+                units: 'm',
+                numZoomLevels: 18,
+                maxResolution: 156543.0339,
+                controls: [
+                    new OpenLayers.Control.Navigation(),
+                    new OpenLayers.Control.PanZoomBar(),
+                    new OpenLayers.Control.LayerSwitcher(),
+                    new OpenLayers.Control.Permalink(),
+                    new OpenLayers.Control.ScaleLine({topOutUnits : "nmi", bottomOutUnits: "km", topInUnits: 'nmi', bottomInUnits: 'm'}),
+                    new OpenLayers.Control.MousePosition()
+                ]
+            };
+
+            map = new OpenLayers.Map('map', options);
+
+            nauticalRoute = new OpenLayers.Control.NauticalRoute({defaultHidden: true, exportUrl: 'export.php'});
+            map.addControl(nauticalRoute);
+
+            // create OSM/OAM layer
+            var mapnik = new OpenLayers.Layer.OSM();
+            var osmarender = new OpenLayers.Layer.OSM(
+                'OpenStreetMap (Tiles@Home)',
+                'http://tah.openstreetmap.org/Tiles/tile/${z}/${x}/${y}.png'
+            );
+
+            map.addLayers([mapnik, osmarender]);
+
+            var initialLocation = new OpenLayers.LonLat(5.35448, 43.29576);
+            initialLocation.transform(map.displayProjection, map.projection);
+            map.setCenter(initialLocation, 14);
+        }
+
+        window.onload = init;
+    //]]>
+    </script>
+    <style type="text/css">
+        #controls {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            height: 20px;
+            right: 10px;
+            text-align: center;
+        }
+        #map {
+            position: absolute;
+            top: 40px;
+            left: 10px;
+            bottom: 10px;
+            right: 10px;
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+    <div id="controls"><button onclick="nauticalRoute.toggle();">Course and distance</button></div>
+    <div id="map"></div>
+</body>
+</html>
+
